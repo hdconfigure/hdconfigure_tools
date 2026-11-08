@@ -54,9 +54,10 @@ main() {
 
     # Final summary messages
     if [ "$success" = true ]; then
-        echo "pagepod successfully installed"
+        echo "tool successfully installed
+        to enable your tools add this to your path \"$HOME/.config/hdconfigure/tools\""
     else
-        echo "pagepod install failed" >&2
+        echo "tool install failed" >&2
         exit 1
     fi
 }
