@@ -71,6 +71,7 @@ main() {
 
     # Final summary messages
     if [ "$success" = true ]; then
+        sh "$HOME/.config/hdconfigure/git/hdconfigure_tools/install_hd_tool" hdconfigure hd_tools_slurp
         echo "tool successfully installed
 to enable your tools add this to your path \"$HOME/.config/hdconfigure/tools\""
     else
