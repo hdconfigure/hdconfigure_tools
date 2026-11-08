@@ -6,7 +6,7 @@
 install_hd_app() {
     target_dir="$1"
     repo_url="$2"
-    base_dir="$HOME/.config/hdcongure/git"
+    base_dir="$HOME/.config/hdconfigure/git"
     target_path="$base_dir/$target_dir"
 
     if [ -d "$target_path" ]; then
@@ -26,7 +26,7 @@ install_hd_app() {
 }
 
 main() {
-    config_dir="$HOME/.config/hdcongure"
+    config_dir="$HOME/.config/hdconfigure"
     tools_dir="$config_dir/tools"
     git_dir="$config_dir/git"
     success=true
