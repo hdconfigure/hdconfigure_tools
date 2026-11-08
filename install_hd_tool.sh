@@ -4,24 +4,25 @@
 # POSIX-compliant script to set up hdconfigure directories, git/tools subdirectories, and applications
 
 install_hd_app() {
-    target_dir="$1"
-    repo_url="$2"
+    github_username="$1"
+    repository_name="$2"
     base_dir="$HOME/.config/hdconfigure/git"
-    target_path="$base_dir/$target_dir"
+    target_path="$base_dir/$repository_name"
+    repo_url="https://github.com/$github_username/$repository_name"
 
     if [ -d "$target_path" ]; then
         rm -rf "$target_path"
     fi
 
     if ! git clone "$repo_url" "$target_path"; then
-        echo "Error: Failed to clone $target_dir from $repo_url" >&2
+        echo "Error: Failed to clone $repository_name from $repo_url" >&2
         return 1
     fi
     if ! (cd "$target_path" && sh install.sh); then
-        echo "Error: Failed to execute install.sh for $target_dir" >&2
+        echo "Error: Failed to execute install.sh for $repository_name" >&2
         return 1
     fi
-    echo "$target_dir successfully installed"
+    echo "$repository_name successfully installed"
     return 0
 }
 
@@ -37,18 +38,15 @@ main() {
         exit 1
     fi
 
-    # Stage 1: Install using dynamic user/repo arguments ($1 and $2)
-    owner="$1"
-    repo="$2"
+    github_username="$1"
+    repository_name="$2"
     
-    if [ -z "$owner" ] || [ -z "$repo" ]; then
-        echo "Error: Missing arguments. Usage: $0 <github_owner> <github_repo>" >&2
+    if [ -z "$github_username" ] || [ -z "$repository_name" ]; then
+        echo "Error: Missing arguments. Usage: $0 <github_username> <repository_name>" >&2
         exit 1
     fi
 
-    repo_url="https://github.com/$owner/$repo"
-
-    if ! install_hd_app "$repo" "$repo_url"; then
+    if ! install_hd_app "$github_username" "$repository_name"; then
         success=false
     fi
 
