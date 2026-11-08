@@ -1,11 +1,11 @@
 #!/bin/sh
 #copyright 2026 Theron Kauk and John Morris Beck - hd.configure.direct@gmail.com - all rights reserved
-# POSIX-compliant script to set up hdconfigure directories, tools subdirectory, and applications
+# POSIX-compliant script to set up hdconfigure directories, git/tools subdirectories, and applications
 
 install_hd_app() {
     target_dir="$1"
     repo_url="$2"
-    base_dir="$HOME/.config/hdcongure/tools"
+    base_dir="$HOME/.config/hdcongure/git"
     target_path="$base_dir/$target_dir"
 
     if [ ! -d "$target_path" ]; then
@@ -27,12 +27,13 @@ install_hd_app() {
 main() {
     config_dir="$HOME/.config/hdcongure"
     tools_dir="$config_dir/tools"
+    git_dir="$config_dir/git"
     success=true
 
-    # Ensure the main config directory and tools subdirectory exist
-    if [ ! -d "$config_dir" ] || [ ! -d "$tools_dir" ]; then
-        if ! mkdir -p "$tools_dir"; then
-            echo "Error: Failed to create directories $config_dir and $tools_dir" >&2
+    # Ensure the main config directory, tools subdirectory, and git subdirectory exist
+    if [ ! -d "$config_dir" ] || [ ! -d "$tools_dir" ] || [ ! -d "$git_dir" ]; then
+        if ! mkdir -p "$tools_dir" "$git_dir"; then
+            echo "Error: Failed to create directories under $config_dir" >&2
             exit 1
         fi
     fi
@@ -51,13 +52,20 @@ main() {
     if ! install_hd_app "$repo" "$repo_url"; then
         success=false
     else
-        # Copy install_hd_tool.sh to tools/install_hd_tool and make executable
-        source_script="$tools_dir/$repo/install_hd_tool.sh"
+        # Copy install_hd_tool.sh from the git folder to tools/install_hd_tool and make executable
+        source_script="$git_dir/$repo/install_hd_tool.sh"
         dest_script="$tools_dir/install_hd_tool"
         if [ -f "$source_script" ]; then
-            if cp "$source_script" "$dest_script"; then
-                chmod +x "$dest_script"
+            if ! cp "$source_script" "$dest_script"; then
+                echo "Error: Failed to copy install_hd_tool" >&2
+                success=false
+            elif ! chmod +x "$dest_script"; then
+                echo "Error: Failed to make install_hd_tool executable" >&2
+                success=false
             fi
+        else
+            echo "Error: $source_script not found." >&2
+            success=false
         fi
     fi
 
