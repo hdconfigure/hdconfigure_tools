@@ -31,12 +31,10 @@ main() {
     git_dir="$config_dir/git"
     success=true
 
-    # Ensure the main config directory, tools subdirectory, and git subdirectory exist
-    if [ ! -d "$config_dir" ] || [ ! -d "$tools_dir" ] || [ ! -d "$git_dir" ]; then
-        if ! mkdir -p "$tools_dir" "$git_dir"; then
-            echo "Error: Failed to create directories under $config_dir" >&2
-            exit 1
-        fi
+    # Unconditionally ensure config, tools, and git subdirectories exist
+    if ! mkdir -p "$config_dir" "$tools_dir" "$git_dir"; then
+        echo "Error: Failed to create directories under $config_dir" >&2
+        exit 1
     fi
 
     # Stage 1: Install using dynamic user/repo arguments ($1 and $2)
