@@ -50,12 +50,21 @@ main() {
 
     if ! install_hd_app "$repo" "$repo_url"; then
         success=false
+    else
+        # Copy install_hd_tool.sh to tools/install_hd_tool and make executable
+        source_script="$tools_dir/$repo/install_hd_tool.sh"
+        dest_script="$tools_dir/install_hd_tool"
+        if [ -f "$source_script" ]; then
+            if cp "$source_script" "$dest_script"; then
+                chmod +x "$dest_script"
+            fi
+        fi
     fi
 
     # Final summary messages
     if [ "$success" = true ]; then
         echo "tool successfully installed
-        to enable your tools add this to your path \"$HOME/.config/hdconfigure/tools\""
+to enable your tools add this to your path \"$HOME/.config/hdconfigure/tools\""
     else
         echo "tool install failed" >&2
         exit 1
