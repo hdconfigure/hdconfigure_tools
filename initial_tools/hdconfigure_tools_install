@@ -1,1 +1,52 @@
+#!/usr/bin/env sh
+#~/.configure/hdconfigure/tools/path/hdconfigure_tools_install
+#Copyright (C) 2026 by Theron Kauk and John Morris Beck <hdconfigure.direct@gmail.com> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+# Description: Copies all files from a specified git tool repository's final 
+#              directory into the local tools path and grants them execute permissions.
+# Compliance: POSIX-compliant sh (Debian dash compatible)
+
+# Exit immediately if a command exits with a non-zero status or if unset variables are used
+set -eu
+
+# Verify that the required argument ($1 - repository/tool name) is provided
+if [ -z "${1:-}" ]; then
+    echo "Error: Missing argument. Please specify the repository or tool name." >&2
+    echo "Usage: $0 <repository_name>" >&2
+    exit 1
+fi
+
+# Define source and destination paths with strict variable quoting
+SRC_DIR="$HOME/.config/hdconfigure/tools/git/$1/hdconfigure/tools/final"
+DEST_DIR="$HOME/.config/hdconfigure/tools/path"
+
+# Check if the source directory exists before proceeding
+if [ ! -d "$SRC_DIR" ]; then
+    echo "Error: Source directory does not exist: $SRC_DIR" >&2
+    exit 1
+fi
+
+# Ensure the destination directory exists
+mkdir -p "$DEST_DIR"
+
+# Iterate over files in the source directory safely using POSIX globbing
+found=0
+for file in "$SRC_DIR"/*; do
+    # Ensure we are matching regular files (skipping subdirectories if any exist)
+    if [ -f "$file" ]; then
+        found=1
+        # Copy file preserving modification times and permissions
+        cp -p "$file" "$DEST_DIR/"
+        
+        # Apply executable permissions to the copied file in the destination path
+        filename=$(basename "$file")
+        chmod +x "$DEST_DIR/$filename"
+    fi
+done
+
+# Provide feedback on the operation
+if [ "$found" -eq 0 ]; then
+    echo "Warning: No files were found to copy in $SRC_DIR" >&2
+else
+    echo "Successfully copied and made executable all files from '$1'."
+fi
