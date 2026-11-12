@@ -1,0 +1,78 @@
+#!/usr/bin/env sh
+#/tmp/hdconfigure_tools/installer_tools/add_hdconfigure_tools_path_to_system_path
+#Copyright (C) 2026 by Theron Kauk and John Morris Beck <hdconfigure.direct@gmail.com> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# ==============================================================================
+# POSIX-Compliant User PATH Configuration Script (Bash & Dash Compatible)
+# ==============================================================================
+# This script permanently adds ~/.config/hdconfigure/tools/path to the user's 
+# PATH via ~/.profile without requiring root privileges.
+#
+# It is fully compatible with both POSIX sh (dash) and bash.
+# Every single step uses explicit if/then/else/fi statements to ensure 
+# zero errors occur along the way.
+# - If all checks pass successfully, prints the required success message to stderr and exits 0.
+# - If any step fails, the 'else' block prints the required error message to stderr and exits 1.
+# ==============================================================================
+
+# Prerequisite: Verify HOME environment variable is set and points to a valid directory
+if [ -n "${HOME:-}" ] && [ -d "$HOME" ]; then
+
+    TARGET_DIR="$HOME/.config/hdconfigure/tools/path"
+    PROFILE_FILE="$HOME/.profile"
+
+    # Step 1: Verify that the target directory to be added actually exists on disk
+    if [ -d "$TARGET_DIR" ]; then
+
+        # Step 2: Ensure ~/.profile exists (create it if missing)
+        if [ -f "$PROFILE_FILE" ] || touch "$PROFILE_FILE" 2>/dev/null; then
+
+            # Step 3: Check if the PATH export is already present in ~/.profile to avoid duplicates
+            if grep -q "hdconfigure/tools/path" "$PROFILE_FILE" 2>/dev/null; then
+
+                # Already present: Success condition
+                echo "success: added hdconfigure_tools to user path" >&2
+                exit 0
+
+            else
+                # Step 4: Append the robust POSIX PATH export block cleanly to ~/.profile
+                if printf '\n# Added by hdconfigure setup\ncase ":$PATH:" in\n    *":%s:"*) ;\n    *) export PATH="%s:$PATH" ;;\nesac\n' "$TARGET_DIR" "$TARGET_DIR" >> "$PROFILE_FILE" 2>/dev/null; then
+
+                    # Step 5: Verify the block was successfully written to the file
+                    if grep -q "hdconfigure/tools/path" "$PROFILE_FILE" 2>/dev/null; then
+
+                        # Success: All steps passed and PATH configuration is written
+                        echo "success: added hdconfigure_tools to user path" >&2
+                        exit 0
+
+                    else
+                        # Error handling for Step 5
+                        echo "error: failed to add hdconfigure_tools to user path" >&2
+                        exit 1
+                    fi
+
+                else
+                    # Error handling for Step 4
+                    echo "error: failed to add hdconfigure_tools to user path" >&2
+                    exit 1
+                fi
+
+            fi
+
+        else
+            # Error handling for Step 2
+            echo "error: failed to add hdconfigure_tools to user path" >&2
+            exit 1
+        fi
+
+    else
+        # Error handling for Step 1 (Target directory missing)
+        echo "error: failed to add hdconfigure_tools to user path" >&2
+        exit 1
+    fi
+
+else
+    # Error handling for Prerequisite
+    echo "error: failed to add hdconfigure_tools to user path" >&2
+    exit 1
+fi
