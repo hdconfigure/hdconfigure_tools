@@ -12,6 +12,8 @@
 #   - /tmp/hdconfigure_tools/initial_tools/hdconfigure_tools_install
 # into the target directory:
 #   ~/.config/hdconfigure/tools/path
+# and then makes each copied file executable (chmod +x), because cp'd files
+# without the execute bit cannot be run by name even when the directory is in PATH.
 #
 # According to official Debian/POSIX standards, each file's existence and 
 # successful copy operation are rigorously validated.
@@ -45,24 +47,42 @@ if [ -n "${HOME:-}" ] && [ -d "$HOME" ]; then
                     # Step 5: Verify hdconfigure_tools_get was successfully copied to destination
                     if [ -f "$DEST_DIR/hdconfigure_tools_get" ]; then
 
-                        # Step 6: Copy hdconfigure_tools_install to the destination directory
-                        if cp "$SRC_INSTALL" "$DEST_DIR/"; then
+                        # Step 6: Make hdconfigure_tools_get executable
+                        if chmod +x "$DEST_DIR/hdconfigure_tools_get"; then
 
-                            # Step 7: Verify hdconfigure_tools_install was successfully copied to destination
-                            if [ -f "$DEST_DIR/hdconfigure_tools_install" ]; then
+                            # Step 7: Copy hdconfigure_tools_install to the destination directory
+                            if cp "$SRC_INSTALL" "$DEST_DIR/"; then
 
-                                # Success: All files copied and verified successfully
-                                echo "success: installed initial hdconfigure_tools" >&2
-                                exit 0
+                                # Step 8: Verify hdconfigure_tools_install was successfully copied to destination
+                                if [ -f "$DEST_DIR/hdconfigure_tools_install" ]; then
+
+                                    # Step 9: Make hdconfigure_tools_install executable
+                                    if chmod +x "$DEST_DIR/hdconfigure_tools_install"; then
+
+                                        # Success: All files copied, verified, and made executable
+                                        echo "success: installed initial hdconfigure_tools" >&2
+                                        exit 0
+
+                                    else
+                                        # Error handling for Step 9 (chmod failed for install script)
+                                        echo "error: failed to install initial hdconfigure_tools" >&2
+                                        exit 1
+                                    fi
+
+                                else
+                                    # Error handling for Step 8 (Destination file check failed)
+                                    echo "error: failed to install initial hdconfigure_tools" >&2
+                                    exit 1
+                                fi
 
                             else
-                                # Error handling for Step 7 (Destination file check failed)
+                                # Error handling for Step 7 (Copy command failed for install script)
                                 echo "error: failed to install initial hdconfigure_tools" >&2
                                 exit 1
                             fi
 
                         else
-                            # Error handling for Step 6 (Copy command failed for install script)
+                            # Error handling for Step 6 (chmod failed for get script)
                             echo "error: failed to install initial hdconfigure_tools" >&2
                             exit 1
                         fi
