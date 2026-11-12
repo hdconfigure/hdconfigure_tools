@@ -2,7 +2,10 @@
 #~/.configure/hdconfigure/tools/path/hdconfigure_tools_install
 #Copyright (C) 2026 by Theron Kauk and John Morris Beck <hdconfigure.direct@gmail.com> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# Description: Copies all files from a specified git tool repository's final 
+#!/usr/bin/env sh
+#
+# Name: install_tools.sh
+# Description: Copies all files from a specified git tool repository's path 
 #              directory into the local tools path and grants them execute permissions.
 # Compliance: POSIX-compliant sh (Debian dash compatible)
 
@@ -17,7 +20,7 @@ if [ -z "${1:-}" ]; then
 fi
 
 # Define source and destination paths with strict variable quoting
-SRC_DIR="$HOME/.config/hdconfigure/tools/git/$1/hdconfigure/tools/final"
+SRC_DIR="$HOME/.config/hdconfigure/tools/git/$1/hdconfigure/tools/path"
 DEST_DIR="$HOME/.config/hdconfigure/tools/path"
 
 # Check if the source directory exists before proceeding
