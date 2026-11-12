@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# ==============================================================================
+# POSIX-Compliant Git Installation Verification Script (Debian Method)
+# ==============================================================================
+# This script verifies that 'git' is installed on the host system using 
+# official Debian package management tools (dpkg-query).
+#
+# Every single step uses explicit if/then/else/fi statements to ensure 
+# zero errors occur along the way.
+# - If all checks pass successfully, prints the required success message to stderr and exits.
+# - If any step fails, the 'else' block prints the required error message to stderr and exits.
+# ==============================================================================
+
+# Step 1: Verify that the dpkg-query utility is available on the system
+if command -v dpkg-query >/dev/null 2>&1; then
+
+    # Step 2: Verify that the dpkg status database file exists
+    if [ -f /var/lib/dpkg/status ]; then
+
+        # Step 3: Query the dpkg database specifically for the git package status
+        if dpkg-query -s git >/dev/null 2>&1; then
+
+            # Step 4: Ensure the package status explicitly indicates it is installed
+            if dpkg-query -W -f='${Status}' git 2>/dev/null | grep -q "install ok installed"; then
+
+                # Success: All verification steps passed
+                echo "success: verified that git is installed on the host system" >&2
+                exit 0
+
+            else
+                # Error handling for Step 4 (Package status is not 'install ok installed')
+                echo "error: failed to verify that git is installed on the hos tsystem" >&2
+                exit 1
+            fi
+
+        else
+            # Error handling for Step 3 (dpkg-query failed to find git package)
+            echo "error: failed to verify that git is installed on the hos tsystem" >&2
+            exit 1
+        fi
+
+    else
+        # Error handling for Step 2 (/var/lib/dpkg/status does not exist)
+        echo "error: failed to verify that git is installed on the hos tsystem" >&2
+        exit 1
+    fi
+
+else
+    # Error handling for Step 1 (dpkg-query command not found)
+    echo "error: failed to verify that git is installed on the hos tsystem" >&2
+    exit 1
+fi
