@@ -24,7 +24,6 @@ DEST_DIR="$HOME/.config/hdconfigure/tools/path"
 if [ ! -d "$SRC_DIR" ]; then
     print_msg "Error: Source directory does not exist: $SRC_DIR"
     exit 1
-}
 fi
 
 print_msg "Ensuring destination directory exists: $DEST_DIR"
