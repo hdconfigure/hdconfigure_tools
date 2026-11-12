@@ -1,0 +1,64 @@
+#!/usr/bin/env sh
+#/tmp/hdconfigure_tools/installer_tools/check_for_debian_host
+#Copyright (C) 2026 by Theron Kauk and John Morris Beck <hdconfigure.direct@gmail.com> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# ==============================================================================
+# POSIX-Compliant Debian Stable Verification Script
+# ==============================================================================
+# This script verifies that the host operating system is Debian Stable 
+# according to official Debian standards (checking /etc/os-release and 
+# /etc/debian_version). 
+# 
+# Each validation step is wrapped in an explicit if/then/else/fi structure.
+# - If a step fails, the 'else' block prints the error message to stderr and exits.
+# - If all checks pass, the success message is printed to stderr and the script exits.
+# ==============================================================================
+
+# Step 1: Verify the existence of the freedesktop release identification file
+if [ -f /etc/os-release ]; then
+
+    # Step 2: Source /etc/os-release and verify that the distribution ID is 'debian'
+    if . /etc/os-release && [ "$ID" = "debian" ]; then
+
+        # Step 3: Verify the existence of the Debian-specific version file
+        if [ -f /etc/debian_version ]; then
+
+            # Step 4: Ensure the system is not running a testing distribution (e.g., forky)
+            if ! grep -q "testing" /etc/debian_version; then
+
+                # Step 5: Ensure the system is not running an unstable distribution (sid)
+                if ! grep -q "sid" /etc/debian_version; then
+
+                    # Success: All verification steps passed successfully
+                    echo "success: verified that host machine is debian stable" >&2
+                    exit 0
+
+                else
+                    # Error handling for Step 5 (Unstable/Sid check failed)
+                    echo "error: failed to verify that host system is debian stable" >&2
+                    exit 1
+                fi
+
+            else
+                # Error handling for Step 4 (Testing check failed)
+                echo "error: failed to verify that host system is debian stable" >&2
+                exit 1
+            fi
+
+        else
+            # Error handling for Step 3 (/etc/debian_version missing)
+            echo "error: failed to verify that host system is debian stable" >&2
+            exit 1
+        fi
+
+    else
+        # Error handling for Step 2 (ID is not debian or file unreadable)
+        echo "error: failed to verify that host system is debian stable" >&2
+        exit 1
+    fi
+
+else
+    # Error handling for Step 1 (/etc/os-release missing)
+    echo "error: failed to verify that host system is debian stable" >&2
+    exit 1
+fi
