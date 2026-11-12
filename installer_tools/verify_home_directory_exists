@@ -1,0 +1,75 @@
+#!/usr/bin/env sh
+#/tmp/hdconfigure_tools/installer_tools/verify_home_directory_exists
+#Copyright (C) 2026 by Theron Kauk and John Morris Beck <hdconfigure.direct@gmail.com> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# ==============================================================================
+# POSIX-Compliant Home Directory Verification Script (Debian Method)
+# ==============================================================================
+# This script verifies that the current user has a valid home directory and 
+# that it is correctly configured and located according to Debian/POSIX standards.
+#
+# Every single step uses explicit if/then/else/fi statements to ensure 
+# zero errors occur along the way.
+# - If all checks pass successfully, prints the required success message to stderr and exits 0.
+# - If any step fails, the 'else' block prints the required error message to stderr and exits 1.
+# ==============================================================================
+
+# Step 1: Verify that the HOME environment variable is set and non-empty
+if [ -n "${HOME:-}" ]; then
+
+    # Step 2: Verify that the path specified by HOME exists and is a directory on disk
+    if [ -d "$HOME" ]; then
+
+        # Step 3: Verify that the system password database query utility 'getent' is available
+        if command -v getent >/dev/null 2>&1; then
+
+            # Step 4: Retrieve the current username securely via 'id'
+            USER_NAME="$(id -un 2>/dev/null)"
+            if [ -n "$USER_NAME" ]; then
+
+                # Step 5: Extract the official home directory path from the system database
+                DB_HOME="$(getent passwd "$USER_NAME" 2>/dev/null | cut -d: -f6)"
+                if [ -n "$DB_HOME" ]; then
+
+                    # Step 6: Verify that the active HOME environment variable matches the system database
+                    if [ "$HOME" = "$DB_HOME" ]; then
+
+                        # Success: All verification steps passed successfully
+                        echo "success: verified that home directory exists" >&2
+                        exit 0
+
+                    else
+                        # Error handling for Step 6 (HOME environment variable mismatch with system database)
+                        echo "error: failed to verify that the home directory exists" >&2
+                        exit 1
+                    fi
+
+                else
+                    # Error handling for Step 5 (Could not parse home directory from getent output)
+                    echo "error: failed to verify that the home directory exists" >&2
+                    exit 1
+                fi
+
+            else
+                # Error handling for Step 4 (Could not determine current username)
+                echo "error: failed to verify that the home directory exists" >&2
+                exit 1
+            fi
+
+        else
+            # Error handling for Step 3 ('getent' command not found)
+            echo "error: failed to verify that the home directory exists" >&2
+            exit 1
+        fi
+
+    else
+        # Error handling for Step 2 (HOME path does not exist or is not a directory)
+        echo "error: failed to verify that the home directory exists" >&2
+        exit 1
+    fi
+
+else
+    # Error handling for Step 1 (HOME environment variable is unset or empty)
+    echo "error: failed to verify that the home directory exists" >&2
+    exit 1
+fi
