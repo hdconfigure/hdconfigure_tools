@@ -1,0 +1,80 @@
+#!/usr/bin/env sh
+/tmp/hdconfigure_tools/installer_tools/create_hdconfigure_tools_directory
+#Copyright (C) 2026 by Theron Kauk and John Morris Beck <hdconfigure.direct@gmail.com> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# ==============================================================================
+# POSIX-Compliant Directory Hierarchy Creation & Verification Script
+# ==============================================================================
+# This script creates and verifies the following structure:
+#   ~/.config
+#   └── hdconfigure
+#       └── tools
+#           ├── git
+#           └── path
+#
+# According to official Debian standards (utilizing mkdir -p), directories are 
+# created recursively without overwriting existing files or subdirectories.
+# 
+# Every single step uses explicit if/then/else/fi statements to ensure 
+# zero errors occur along the way.
+# - If all checks pass successfully, prints the required success message to stderr and exits 0.
+# - If any step fails, the 'else' block prints the required error message to stderr and exits 1.
+# ==============================================================================
+
+# Prerequisite: Verify HOME environment variable is set and points to a valid directory
+if [ -n "${HOME:-}" ] && [ -d "$HOME" ]; then
+
+    # Step 1: Create and verify ~/.config
+    if mkdir -p "$HOME/.config" && [ -d "$HOME/.config" ]; then
+
+        # Step 2: Create and verify ~/.config/hdconfigure
+        if mkdir -p "$HOME/.config/hdconfigure" && [ -d "$HOME/.config/hdconfigure" ]; then
+
+            # Step 3: Create and verify ~/.config/hdconfigure/tools
+            if mkdir -p "$HOME/.config/hdconfigure/tools" && [ -d "$HOME/.config/hdconfigure/tools" ]; then
+
+                # Step 4: Create and verify ~/.config/hdconfigure/tools/git
+                if mkdir -p "$HOME/.config/hdconfigure/tools/git" && [ -d "$HOME/.config/hdconfigure/tools/git" ]; then
+
+                    # Step 5: Create and verify ~/.config/hdconfigure/tools/path
+                    if mkdir -p "$HOME/.config/hdconfigure/tools/path" && [ -d "$HOME/.config/hdconfigure/tools/path" ]; then
+
+                        # Success: All directories created and verified successfully
+                        echo "success: created hdconfigure_tools directory" >&2
+                        exit 0
+
+                    else
+                        # Error handling for Step 5
+                        echo "error: failed to create hdconfigure_tools directory" >&2
+                        exit 1
+                    fi
+
+                else
+                    # Error handling for Step 4
+                    echo "error: failed to create hdconfigure_tools directory" >&2
+                    exit 1
+                fi
+
+            else
+                # Error handling for Step 3
+                echo "error: failed to create hdconfigure_tools directory" >&2
+                exit 1
+            fi
+
+        else
+            # Error handling for Step 2
+            echo "error: failed to create hdconfigure_tools directory" >&2
+            exit 1
+        fi
+
+    else
+        # Error handling for Step 1
+        echo "error: failed to create hdconfigure_tools directory" >&2
+        exit 1
+    fi
+
+else
+    # Error handling for Prerequisite (HOME invalid or unset)
+    echo "error: failed to create hdconfigure_tools directory" >&2
+    exit 1
+fi
